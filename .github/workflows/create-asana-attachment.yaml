@@ -3,6 +3,7 @@ on:
 
 jobs:
   create-asana-attachment-job:
+    if: "!contains(github.event.head_commit.message, 'https://app.asana.com/')"
     runs-on: ubuntu-latest
     name: Create pull request attachments on Asana tasks
     steps:

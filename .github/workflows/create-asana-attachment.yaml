@@ -2,17 +2,34 @@ on:
   push
 
 jobs:
-  create-asana-attachment-job:
-    if: "!contains(github.event.head_commit.message, 'https://app.asana.com/')"
+  # create-asana-attachment-job:
+  #   if: "contains(github.event.head_commit.message, 'https://app.asana.com/')"
+  #   runs-on: ubuntu-latest
+  #   name: Create pull request attachments on Asana tasks
+  #   steps:
+  #     - name: Create pull request attachments
+  #       uses: Asana/create-app-attachment-github-action@latest
+  #       id: postAttachment
+  #       with:
+  #         asana-secret: ${{ secrets.ASANA_SECRET }}
+  #         comment-text: "Test!"
+  #         allowed-projects: |
+  #           1202776406454487
+  #     - name: Log output status
+  #       run: echo "Status is ${{ steps.postAttachment.outputs.status }}"
+
+  create-comment-in-asana-task-job:
+    if: "contains(github.event.head_commit.message, 'https://app.asana.com/')"
     runs-on: ubuntu-latest
-    name: Create pull request attachments on Asana tasks
+    name: Create a comment in Asana Task
     steps:
-      - name: Create pull request attachments
-        uses: Asana/create-app-attachment-github-action@latest
-        id: postAttachment
+      - name: Create a comment
+        uses: Asana/comment-on-task-github-action@v1.2
+        id: createComment
         with:
           asana-secret: ${{ secrets.ASANA_SECRET }}
+          comment-text: "Test!"
           allowed-projects: |
             1202776406454487
-      - name: Log output status
-        run: echo "Status is ${{ steps.postAttachment.outputs.status }}"
+      - name: Get status
+        run: echo "Status is ${{ steps.createComment.outputs.status }}"

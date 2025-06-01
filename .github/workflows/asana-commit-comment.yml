@@ -1,0 +1,40 @@
+name: Comment on Asana Task
+
+on:
+  push:
+    branches:
+      - main  # or your preferred branch
+
+jobs:
+  commentAsana:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Extract commit message
+      id: extract_commit
+      run: |
+        echo "commit_msg=$(git log -1 --pretty=format:'%s')" >> $GITHUB_OUTPUT
+
+    - name: Comment to Asana
+      env:
+        ASANA_TOKEN: ${{ secrets.ASANA_TOKEN }}
+        COMMIT_MSG: ${{ steps.extract_commit.outputs.commit_msg }}
+      run: |
+        echo "Commit Message: $COMMIT_MSG"
+
+        # Extract Asana task ID from commit message (e.g., ASANA1234567890)
+        TASK_ID=$(echo "$COMMIT_MSG" | grep -oE 'ASANA[0-9]+' | sed 's/ASANA//')
+        if [ -z "$TASK_ID" ]; then
+          echo "No Asana task ID found in commit message. Skipping."
+          exit 0
+        fi
+
+        COMMENT="GitHub commit pushed: ${COMMIT_MSG} by ${{ github.actor }}. View commit: https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+
+        curl -s -X POST https://app.asana.com/api/1.0/tasks/${TASK_ID}/stories \
+          -H "Authorization: Bearer $ASANA_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\": \"$COMMENT\"}"

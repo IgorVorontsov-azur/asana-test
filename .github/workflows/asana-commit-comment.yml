@@ -20,7 +20,7 @@ jobs:
 
     - name: Comment to Asana
       env:
-        ASANA_TOKEN: ${{ secrets.ASANA_TOKEN }}
+        ASANA_TOKEN: ${{ secrets.ASANA_SECRET }}
         COMMIT_MSG: ${{ steps.extract_commit.outputs.commit_msg }}
       run: |
         echo "Commit Message: $COMMIT_MSG"
